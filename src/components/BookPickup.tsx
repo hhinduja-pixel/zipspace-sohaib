@@ -1,151 +1,186 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, Calendar, User, Phone, Mail, Package, Upload, CreditCard, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { MapPin, User, Phone, Mail, Package, CheckCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 const storagePlans = [
-  { id: "economy", name: "Economy", price: 1499, display: "₹1,499/mo" },
-  { id: "walk_in_closet", name: "Walk-In Closet", price: 2499, display: "₹2,499/mo" },
-  { id: "store_room", name: "Store Room", price: 4999, display: "₹4,999/mo" },
-  { id: "premium", name: "Premium", price: 12999, display: "₹12,999/mo" },
+  { id: "economy", name: "Economy Plan", description: "Up to 10 medium boxes", price: "₹1,499" },
+  { id: "walk_in_closet", name: "Walk-In Closet", description: "5×5×8.8 ft", price: "₹2,499" },
+  { id: "store_room", name: "Store Room", description: "5×10×8.8 ft", price: "₹4,999" },
+  { id: "premium", name: "Premium Plan", description: "10×10×8.8 ft", price: "₹12,999" },
+  { id: "custom", name: "Custom Plans for Businesses", description: "Contact us for pricing", price: "" },
 ];
 
-const servicePlans = [
-  { id: "basic", name: "Basic", price: 0, display: "Free" },
-  { id: "elite", name: "Elite", price: 1799, display: "₹1,799/mo" },
-];
-
-const timeSlots = [
-  "9:00 AM - 11:00 AM",
-  "11:00 AM - 1:00 PM",
-  "2:00 PM - 4:00 PM",
-  "4:00 PM - 6:00 PM",
+const boxTypes = [
+  { id: "medium", name: "Medium Box" },
+  { id: "large", name: "Large Box" },
 ];
 
 const BookPickup = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    address: "",
+    location: "",
+    serviceType: "",
+    numberOfBoxes: "",
+    boxType: "",
     storagePlan: "",
-    servicePlan: "basic",
-    pickupDate: "",
-    pickupTimeSlot: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const calculateTotal = () => {
-    const storage = storagePlans.find((p) => p.id === formData.storagePlan);
-    const service = servicePlans.find((p) => p.id === formData.servicePlan);
-    const subtotal = (storage?.price || 0) + (service?.price || 0);
-    // 15% first-time discount
-    const discount = subtotal * 0.15;
-    return Math.round(subtotal - discount);
+  const validatePhone = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, "");
+    return cleaned.length === 10;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setPaymentScreenshot(e.target.files[0]);
+  const validateEmail = (email: string) => {
+    if (!email) return true; // Optional field
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
     }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Contact number is required";
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-digit number";
+    }
+
+    if (formData.email && !validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (!formData.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+
+    if (!formData.serviceType) {
+      newErrors.serviceType = "Please select a service type";
+    }
+
+    if (formData.serviceType === "store_boxes") {
+      if (!formData.numberOfBoxes) {
+        newErrors.numberOfBoxes = "Please select number of boxes";
+      }
+      if (!formData.boxType) {
+        newErrors.boxType = "Please select box type";
+      }
+    }
+
+    if (formData.serviceType === "storage_plan" && !formData.storagePlan) {
+      newErrors.storagePlan = "Please select a storage plan";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleUseLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Please enter your address manually.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setFormData((prev) => ({
+          ...prev,
+          location: `Location detected (${latitude.toFixed(4)}, ${longitude.toFixed(4)}) - We'll confirm exact address`,
+        }));
+        setErrors((prev) => ({ ...prev, location: "" }));
+        setIsLocating(false);
+        toast({
+          title: "Location Detected",
+          description: "We'll confirm your exact address when we call.",
+        });
+      },
+      () => {
+        setIsLocating(false);
+        toast({
+          title: "Location Access Denied",
+          description: "Please enter your address manually.",
+          variant: "destructive",
+        });
+      }
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.storagePlan) {
-      toast({ title: "Please select a storage plan", variant: "destructive" });
-      return;
-    }
-
-    if (!formData.pickupTimeSlot) {
-      toast({ title: "Please select a pickup time slot", variant: "destructive" });
+    if (!validateForm()) {
+      toast({
+        title: "Please fill all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      let screenshotUrl = null;
-
-      // Upload payment screenshot if provided
-      if (paymentScreenshot) {
-        const fileExt = paymentScreenshot.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        
-        const { error: uploadError, data: uploadData } = await supabase.storage
-          .from("payment-screenshots")
-          .upload(fileName, paymentScreenshot);
-
-        if (uploadError) throw uploadError;
-
-        const { data: publicUrl } = supabase.storage
-          .from("payment-screenshots")
-          .getPublicUrl(fileName);
-        
-        screenshotUrl = publicUrl.publicUrl;
-      }
-
-      const totalAmount = calculateTotal();
+      // For store boxes, we use economy plan as default
+      const storagePlanValue = formData.serviceType === "store_boxes" ? "economy" : 
+        (formData.storagePlan === "custom" ? "premium" : formData.storagePlan);
 
       // Insert booking into database
       const { error: bookingError } = await supabase.from("bookings").insert({
-        customer_name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        address: formData.address,
-        storage_plan: formData.storagePlan as "economy" | "walk_in_closet" | "store_room" | "premium",
-        service_plan: formData.servicePlan as "basic" | "elite",
-        pickup_date: formData.pickupDate,
-        pickup_time_slot: formData.pickupTimeSlot,
-        payment_screenshot_url: screenshotUrl,
-        total_amount: totalAmount,
+        customer_name: formData.name.trim(),
+        phone: formData.phone.replace(/\D/g, ""),
+        email: formData.email.trim() || "not-provided@zipspace.in",
+        address: formData.location.trim(),
+        storage_plan: storagePlanValue as "economy" | "walk_in_closet" | "store_room" | "premium",
+        service_plan: "basic",
+        pickup_date: new Date().toISOString().split("T")[0],
+        pickup_time_slot: "To be scheduled",
+        total_amount: 0, // Will be confirmed by team
         is_first_time: true,
       });
 
       if (bookingError) throw bookingError;
 
-      // Send notification emails
+      // Send notification email
       await supabase.functions.invoke("send-booking-notification", {
         body: {
           customerName: formData.name,
-          email: formData.email,
+          email: formData.email || "not-provided@zipspace.in",
           phone: formData.phone,
-          address: formData.address,
+          address: formData.location,
+          serviceType: formData.serviceType,
           storagePlan: formData.storagePlan,
-          servicePlan: formData.servicePlan,
-          pickupDate: formData.pickupDate,
-          pickupTimeSlot: formData.pickupTimeSlot,
-          totalAmount,
-          isFirstTime: true,
+          numberOfBoxes: formData.numberOfBoxes,
+          boxType: formData.boxType,
         },
       });
 
-      // Navigate to thank you page
-      navigate("/thank-you", {
-        state: {
-          booking: {
-            customerName: formData.name,
-            email: formData.email,
-            pickupDate: formData.pickupDate,
-            pickupTimeSlot: formData.pickupTimeSlot,
-            address: formData.address,
-            totalAmount,
-          },
-        },
-      });
+      setIsSubmitted(true);
     } catch (error: any) {
-      console.error("Booking error:", error);
+      console.error("Submission error:", error);
       toast({
-        title: "Booking Failed",
-        description: error.message || "Please try again later.",
+        title: "Submission Failed",
+        description: "Please try again or contact us directly.",
         variant: "destructive",
       });
     } finally {
@@ -153,258 +188,283 @@ const BookPickup = () => {
     }
   };
 
-  const handleUseLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          setFormData((prev) => ({
-            ...prev,
-            address: "Location detected - We'll confirm the exact address",
-          }));
-          toast({
-            title: "Location Detected",
-            description: "We'll confirm your exact address during the call.",
-          });
-        },
-        () => {
-          toast({
-            title: "Location Access Denied",
-            description: "Please enter your address manually.",
-            variant: "destructive",
-          });
-        }
-      );
-    }
-  };
+  if (isSubmitted) {
+    return (
+      <section id="book-pickup" className="section-padding bg-background">
+        <div className="container-tight mx-auto">
+          <div className="max-w-xl mx-auto text-center">
+            <div className="bg-card rounded-2xl p-8 md:p-12 shadow-soft border border-border">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">Thank You!</h2>
+              <p className="text-muted-foreground text-lg">
+                Our team will call you shortly to confirm your storage request.
+              </p>
+              <Button
+                className="mt-6"
+                variant="outline"
+                onClick={() => {
+                  setIsSubmitted(false);
+                  setFormData({
+                    name: "",
+                    phone: "",
+                    email: "",
+                    location: "",
+                    serviceType: "",
+                    numberOfBoxes: "",
+                    boxType: "",
+                    storagePlan: "",
+                  });
+                }}
+              >
+                Submit Another Request
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="book-pickup" className="section-padding bg-background">
       <div className="container-tight mx-auto">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Book Your Pickup</h2>
-            <p className="text-muted-foreground text-lg">
-              Fill in your details and we'll pick up your items at your convenience.
-              <span className="block mt-2 text-primary font-semibold">
-                15% off + Free pickup for first-time customers!
-              </span>
+        <div className="max-w-xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3 text-foreground">Book Your Pickup</h2>
+            <p className="text-muted-foreground">
+              Fill in your details and we'll get back to you shortly.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 md:p-10 shadow-soft border border-border">
-            {/* Personal Details */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                Personal Details
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      placeholder="+91 9876543210"
-                      className="pl-10"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="john@example.com"
-                      className="pl-10"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
+          <form onSubmit={handleSubmit} className="bg-card rounded-2xl p-6 md:p-8 shadow-soft border border-border space-y-6">
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="name"
+                placeholder="Your full name"
+                value={formData.name}
+                onChange={(e) => {
+                  setFormData({ ...formData, name: e.target.value });
+                  setErrors((prev) => ({ ...prev, name: "" }));
+                }}
+                className={errors.name ? "border-destructive" : ""}
+              />
+              {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
             </div>
 
-            {/* Address */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                Pickup Address
-              </h3>
-              <div className="space-y-3">
+            {/* Contact Number */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary" />
+                Contact Number <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="10-digit mobile number"
+                value={formData.phone}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setFormData({ ...formData, phone: value });
+                  setErrors((prev) => ({ ...prev, phone: "" }));
+                }}
+                className={errors.phone ? "border-destructive" : ""}
+              />
+              {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary" />
+                Email <span className="text-muted-foreground text-xs">(optional)</span>
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  setErrors((prev) => ({ ...prev, email: "" }));
+                }}
+                className={errors.email ? "border-destructive" : ""}
+              />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+            </div>
+
+            {/* Location */}
+            <div className="space-y-2">
+              <Label htmlFor="location" className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary" />
+                Location <span className="text-destructive">*</span>
+              </Label>
+              <div className="space-y-2">
                 <Input
-                  placeholder="Enter your full address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  required
+                  id="location"
+                  placeholder="Enter your address"
+                  value={formData.location}
+                  onChange={(e) => {
+                    setFormData({ ...formData, location: e.target.value });
+                    setErrors((prev) => ({ ...prev, location: "" }));
+                  }}
+                  className={errors.location ? "border-destructive" : ""}
                 />
-                <Button type="button" variant="outline" size="sm" onClick={handleUseLocation}>
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Use Current Location
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleUseLocation}
+                  disabled={isLocating}
+                  className="w-full sm:w-auto"
+                >
+                  {isLocating ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4 mr-2" />
+                  )}
+                  {isLocating ? "Detecting..." : "Use Current Location"}
                 </Button>
               </div>
+              {errors.location && <p className="text-sm text-destructive">{errors.location}</p>}
             </div>
 
-            {/* Storage Plan Selection */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-primary" />
-                Select Storage Plan
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {storagePlans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, storagePlan: plan.id })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      formData.storagePlan === plan.id
-                        ? "border-primary bg-accent"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <p className="font-semibold text-secondary text-sm">{plan.name}</p>
-                    <p className="text-primary text-sm font-medium">{plan.display}</p>
-                  </button>
-                ))}
-              </div>
+            {/* Type of Service */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-primary" />
+                Type of Service <span className="text-destructive">*</span>
+              </Label>
+              <RadioGroup
+                value={formData.serviceType}
+                onValueChange={(value) => {
+                  setFormData({
+                    ...formData,
+                    serviceType: value,
+                    numberOfBoxes: "",
+                    boxType: "",
+                    storagePlan: "",
+                  });
+                  setErrors((prev) => ({ ...prev, serviceType: "", numberOfBoxes: "", boxType: "", storagePlan: "" }));
+                }}
+                className="flex flex-col sm:flex-row gap-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="store_boxes" id="store_boxes" />
+                  <Label htmlFor="store_boxes" className="cursor-pointer font-normal">Store Boxes</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="storage_plan" id="storage_plan" />
+                  <Label htmlFor="storage_plan" className="cursor-pointer font-normal">Storage Plan</Label>
+                </div>
+              </RadioGroup>
+              {errors.serviceType && <p className="text-sm text-destructive">{errors.serviceType}</p>}
             </div>
 
-            {/* Service Plan Selection */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4">Select Service Plan</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {servicePlans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, servicePlan: plan.id })}
-                    className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      formData.servicePlan === plan.id
-                        ? "border-primary bg-accent"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <p className="font-semibold text-secondary">{plan.name}</p>
-                    <p className="text-primary font-medium">{plan.display}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Pickup Date & Time */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                Pickup Schedule
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
+            {/* Conditional: Store Boxes Fields */}
+            {formData.serviceType === "store_boxes" && (
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border">
                 <div className="space-y-2">
-                  <Label htmlFor="pickup-date">Pickup Date</Label>
-                  <Input
-                    id="pickup-date"
-                    type="date"
-                    value={formData.pickupDate}
-                    onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-                    min={new Date().toISOString().split("T")[0]}
-                    required
-                  />
+                  <Label htmlFor="numberOfBoxes">
+                    Number of Boxes <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={formData.numberOfBoxes}
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, numberOfBoxes: value });
+                      setErrors((prev) => ({ ...prev, numberOfBoxes: "" }));
+                    }}
+                  >
+                    <SelectTrigger className={errors.numberOfBoxes ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Select number of boxes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 50 }, (_, i) => i + 1).map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num} {num === 1 ? "box" : "boxes"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.numberOfBoxes && <p className="text-sm text-destructive">{errors.numberOfBoxes}</p>}
                 </div>
+
                 <div className="space-y-2">
-                  <Label>Time Slot</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {timeSlots.map((slot) => (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, pickupTimeSlot: slot })}
-                        className={`p-2 text-xs rounded-lg border transition-all ${
-                          formData.pickupTimeSlot === slot
-                            ? "border-primary bg-accent text-primary"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <Clock className="w-3 h-3 inline mr-1" />
-                        {slot}
-                      </button>
-                    ))}
-                  </div>
+                  <Label htmlFor="boxType">
+                    Box Type <span className="text-destructive">*</span>
+                  </Label>
+                  <Select
+                    value={formData.boxType}
+                    onValueChange={(value) => {
+                      setFormData({ ...formData, boxType: value });
+                      setErrors((prev) => ({ ...prev, boxType: "" }));
+                    }}
+                  >
+                    <SelectTrigger className={errors.boxType ? "border-destructive" : ""}>
+                      <SelectValue placeholder="Select box type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {boxTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.boxType && <p className="text-sm text-destructive">{errors.boxType}</p>}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Payment Section */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold text-secondary mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary" />
-                Payment
-              </h3>
-              
-              {formData.storagePlan && (
-                <div className="bg-muted/50 rounded-xl p-4 mb-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>₹{(storagePlans.find(p => p.id === formData.storagePlan)?.price || 0) + (servicePlans.find(p => p.id === formData.servicePlan)?.price || 0)}</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2 text-green-600">
-                    <span>First-time discount (15%)</span>
-                    <span>-₹{Math.round(((storagePlans.find(p => p.id === formData.storagePlan)?.price || 0) + (servicePlans.find(p => p.id === formData.servicePlan)?.price || 0)) * 0.15)}</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2 text-green-600">
-                    <span>Free Pickup</span>
-                    <span>₹0</span>
-                  </div>
-                  <div className="border-t border-border pt-2 mt-2">
-                    <div className="flex justify-between items-center font-bold text-lg">
-                      <span>Total</span>
-                      <span className="text-primary">₹{calculateTotal()}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-accent/50 rounded-xl p-4 mb-4">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Pay via UPI/QR Code and upload screenshot:
-                </p>
-                <p className="font-mono text-primary font-semibold">UPI: zipspace@upi</p>
-              </div>
-
+            {/* Conditional: Storage Plan Selection */}
+            {formData.serviceType === "storage_plan" && (
               <div className="space-y-2">
-                <Label htmlFor="payment-screenshot">Upload Payment Screenshot (Optional)</Label>
-                <div className="relative">
-                  <Input
-                    id="payment-screenshot"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="cursor-pointer"
-                  />
-                  {paymentScreenshot && (
-                    <p className="text-sm text-green-600 mt-1">✓ {paymentScreenshot.name}</p>
-                  )}
-                </div>
+                <Label htmlFor="storagePlan">
+                  Select Plan <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formData.storagePlan}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, storagePlan: value });
+                    setErrors((prev) => ({ ...prev, storagePlan: "" }));
+                  }}
+                >
+                  <SelectTrigger className={errors.storagePlan ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Select a storage plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {storagePlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {plan.name} {plan.price && `— ${plan.price}`}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{plan.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.storagePlan && <p className="text-sm text-destructive">{errors.storagePlan}</p>}
               </div>
-            </div>
+            )}
 
+            {/* Submit Button */}
             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Processing..." : "Book Pickup Now"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Request"
+              )}
             </Button>
           </form>
         </div>

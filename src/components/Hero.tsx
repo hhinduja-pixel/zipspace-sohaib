@@ -20,8 +20,8 @@ const Hero = () => {
 
           {/* Main Heading */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-delay-1">
-            Store More,{" "}
-            <span className="gradient-text">Worry Less</span>
+            More Space,{" "}
+            <span className="gradient-text">Less Stress.</span>
           </h1>
 
           {/* Subheading */}

@@ -14,7 +14,193 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          address: string
+          created_at: string
+          customer_name: string
+          email: string
+          id: string
+          is_first_time: boolean | null
+          payment_screenshot_url: string | null
+          phone: string
+          pickup_date: string
+          pickup_time_slot: string
+          service_plan: Database["public"]["Enums"]["service_plan"]
+          status: Database["public"]["Enums"]["booking_status"]
+          storage_plan: Database["public"]["Enums"]["storage_plan"]
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          customer_name: string
+          email: string
+          id?: string
+          is_first_time?: boolean | null
+          payment_screenshot_url?: string | null
+          phone: string
+          pickup_date: string
+          pickup_time_slot: string
+          service_plan?: Database["public"]["Enums"]["service_plan"]
+          status?: Database["public"]["Enums"]["booking_status"]
+          storage_plan: Database["public"]["Enums"]["storage_plan"]
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          customer_name?: string
+          email?: string
+          id?: string
+          is_first_time?: boolean | null
+          payment_screenshot_url?: string | null
+          phone?: string
+          pickup_date?: string
+          pickup_time_slot?: string
+          service_plan?: Database["public"]["Enums"]["service_plan"]
+          status?: Database["public"]["Enums"]["booking_status"]
+          storage_plan?: Database["public"]["Enums"]["storage_plan"]
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      otp_codes: {
+        Row: {
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          verified: boolean | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          verified?: boolean | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      return_items: {
+        Row: {
+          created_at: string
+          id: string
+          return_request_id: string
+          stored_item_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          return_request_id: string
+          stored_item_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          return_request_id?: string
+          stored_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_items_return_request_id_fkey"
+            columns: ["return_request_id"]
+            isOneToOne: false
+            referencedRelation: "return_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_items_stored_item_id_fkey"
+            columns: ["stored_item_id"]
+            isOneToOne: false
+            referencedRelation: "stored_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_requests: {
+        Row: {
+          booking_id: string
+          completed_at: string | null
+          id: string
+          requested_at: string
+          return_address: string
+          status: string
+        }
+        Insert: {
+          booking_id: string
+          completed_at?: string | null
+          id?: string
+          requested_at?: string
+          return_address: string
+          status?: string
+        }
+        Update: {
+          booking_id?: string
+          completed_at?: string | null
+          id?: string
+          requested_at?: string
+          return_address?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_requests_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stored_items: {
+        Row: {
+          booking_id: string
+          created_at: string
+          description: string | null
+          id: string
+          item_name: string
+          quantity: number
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name: string
+          quantity?: number
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stored_items_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +209,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      booking_status:
+        | "pending"
+        | "confirmed"
+        | "picked_up"
+        | "stored"
+        | "returned"
+      service_plan: "basic" | "elite"
+      storage_plan: "economy" | "walk_in_closet" | "store_room" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +343,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: [
+        "pending",
+        "confirmed",
+        "picked_up",
+        "stored",
+        "returned",
+      ],
+      service_plan: ["basic", "elite"],
+      storage_plan: ["economy", "walk_in_closet", "store_room", "premium"],
+    },
   },
 } as const

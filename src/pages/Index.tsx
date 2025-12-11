@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import ImageCarousel from "@/components/ImageCarousel";
 import Subscriptions from "@/components/Subscriptions";
 import BookPickup from "@/components/BookPickup";
 import ReturnItems from "@/components/ReturnItems";
@@ -14,8 +15,9 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <Subscriptions />
+        <ImageCarousel />
         <BookPickup />
+        <Subscriptions />
         <ReturnItems />
         <Pricing />
         <Testimonials />

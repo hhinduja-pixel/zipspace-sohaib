@@ -27,7 +27,8 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map(link => <a key={link.href} href={link.href} className="text-muted-foreground hover:text-secondary transition-colors duration-200 font-medium">Return my Items{link.label}
+            {navLinks.map(link => <a key={link.href} href={link.href} className="text-muted-foreground hover:text-secondary transition-colors duration-200 font-medium">
+                {link.label}
               </a>)}
           </div>
 

@@ -52,6 +52,17 @@ const Pricing = () => {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Flexible pricing for every requirement. All plans include free first pickup.
           </p>
+          {/* Box Pricing */}
+          <div className="flex flex-wrap justify-center gap-6 mt-6">
+            <div className="flex items-center gap-2 bg-card border border-border rounded-full px-5 py-2 shadow-soft">
+              <span className="font-semibold text-secondary">Medium Box</span>
+              <span className="text-primary font-bold">₹299/box</span>
+            </div>
+            <div className="flex items-center gap-2 bg-card border border-border rounded-full px-5 py-2 shadow-soft">
+              <span className="font-semibold text-secondary">Large Box</span>
+              <span className="text-primary font-bold">₹349/box</span>
+            </div>
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

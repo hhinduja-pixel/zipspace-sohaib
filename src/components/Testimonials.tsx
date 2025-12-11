@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react";
+import testimonialPriya from "@/assets/testimonial-priya.png";
+import testimonialRahul from "@/assets/testimonial-rahul.png";
+import testimonialAnjali from "@/assets/testimonial-anjali.png";
+import testimonialVikram from "@/assets/testimonial-vikram.png";
 
 const testimonials = [
   {
@@ -7,24 +11,28 @@ const testimonials = [
     role: "Working Professional",
     content: "ZipSpace made relocating so easy! Their pickup was on time, and my belongings were stored safely for 6 months. Highly recommend their Elite service.",
     rating: 5,
+    image: testimonialPriya,
   },
   {
     name: "Rahul Mehta",
     role: "Student",
     content: "Perfect for students! I stored my room items during summer break. The Economy plan was affordable and the staff was very helpful.",
     rating: 5,
+    image: testimonialRahul,
   },
   {
     name: "Anjali Kapoor",
     role: "Business Owner",
     content: "We use ZipSpace for storing our seasonal inventory. The Premium plan with climate control keeps everything in perfect condition.",
     rating: 5,
+    image: testimonialAnjali,
   },
   {
     name: "Vikram Singh",
     role: "Home Owner",
     content: "During our home renovation, ZipSpace stored all our furniture. The 48-hour delivery when we needed items back was impressive!",
     rating: 5,
+    image: testimonialVikram,
   },
 ];
 
@@ -73,7 +81,12 @@ const Testimonials = () => {
                 "{testimonials[currentIndex].content}"
               </p>
 
-              <div className="text-center">
+              <div className="flex flex-col items-center">
+                <img
+                  src={testimonials[currentIndex].image}
+                  alt={testimonials[currentIndex].name}
+                  className="w-16 h-16 rounded-full object-cover mb-4 border-2 border-primary/20 shadow-md"
+                />
                 <p className="font-semibold text-secondary text-lg">
                   {testimonials[currentIndex].name}
                 </p>

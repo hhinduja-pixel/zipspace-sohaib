@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Package, Mail, ArrowRight, MapPin, Loader2 } from "lucide-react";
+import { Package, Mail, ArrowRight, MapPin, Loader2, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 interface StoredItem {
@@ -25,6 +25,7 @@ const ReturnItems = () => {
     toast
   } = useToast();
   const [email, setEmail] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -203,7 +204,15 @@ const ReturnItems = () => {
                     </div>
                   </div>
 
-                  {!isOtpSent && email && <Button type="submit" className="w-full" disabled={isLoading}>
+                  <div className="space-y-2 text-left">
+                    <Label htmlFor="return-mobile">Mobile Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="return-mobile" type="tel" placeholder="Enter your mobile number" className="pl-10" value={mobileNumber} onChange={e => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))} disabled={isOtpSent} required />
+                    </div>
+                  </div>
+
+                  {!isOtpSent && email && mobileNumber.length === 10 && <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                       Send OTP
                       <ArrowRight className="w-4 h-4 ml-2" />

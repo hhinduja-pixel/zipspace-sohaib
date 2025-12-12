@@ -21,8 +21,9 @@ const Navbar = () => {
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container-tight mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="ZipSpace Logo" className="h-10 md:h-12 w-auto" />
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logo} alt="ZipSpace Logo" className="h-12 md:h-14 w-auto" />
+            <span className="text-xl md:text-2xl font-bold text-secondary">Zip Space</span>
           </Link>
 
           {/* Desktop Navigation */}

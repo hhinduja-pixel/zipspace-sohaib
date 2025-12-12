@@ -21,11 +21,11 @@ const ImageCarousel = () => {
   }, []);
 
   return (
-    <section className="py-12 bg-muted/30 overflow-hidden">
+    <section className="py-8 bg-muted/30 overflow-hidden">
       <div className="container-tight mx-auto px-4">
-        <div className="relative overflow-hidden rounded-2xl shadow-lg">
+        <div className="relative overflow-hidden rounded-2xl shadow-lg max-w-3xl mx-auto">
           <div
-            className="flex transition-transform duration-500 ease-in-out"
+            className="flex transition-transform duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
             {images.map((image, index) => (
@@ -33,10 +33,10 @@ const ImageCarousel = () => {
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-contain max-h-[400px]"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6 md:p-8">
-                  <p className="text-white text-xl md:text-3xl font-bold text-center drop-shadow-lg">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 md:p-6">
+                  <p className="text-white text-lg md:text-2xl font-bold text-center drop-shadow-lg">
                     {image.alt}
                   </p>
                 </div>
@@ -45,13 +45,13 @@ const ImageCarousel = () => {
           </div>
         </div>
         {/* Dots indicator */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center gap-2 mt-3">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                index === currentIndex ? "bg-primary" : "bg-muted-foreground/30"
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                index === currentIndex ? "bg-primary scale-110" : "bg-muted-foreground/30"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />

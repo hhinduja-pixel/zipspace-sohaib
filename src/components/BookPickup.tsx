@@ -36,6 +36,7 @@ const BookPickup = () => {
     boxType: "",
     storagePlan: "",
     servicePlan: "basic",
+    storageDuration: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -173,6 +174,8 @@ const BookPickup = () => {
           storagePlan: formData.storagePlan,
           numberOfBoxes: formData.numberOfBoxes,
           boxType: formData.boxType,
+          servicePlan: formData.servicePlan,
+          storageDuration: formData.storageDuration,
         },
       });
 
@@ -217,6 +220,7 @@ const BookPickup = () => {
                     boxType: "",
                     storagePlan: "",
                     servicePlan: "basic",
+                    storageDuration: "",
                   });
                 }}
               >
@@ -485,6 +489,32 @@ const BookPickup = () => {
                   </Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            {/* Storage Duration */}
+            <div className="space-y-2">
+              <Label htmlFor="storageDuration" className="flex items-center gap-2">
+                <Package className="w-4 h-4 text-primary" />
+                Storage Duration
+              </Label>
+              <Select
+                value={formData.storageDuration}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, storageDuration: value });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select storage duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1_month">1 Month</SelectItem>
+                  <SelectItem value="2_months">2 Months</SelectItem>
+                  <SelectItem value="3_months">3 Months</SelectItem>
+                  <SelectItem value="6_months">6 Months</SelectItem>
+                  <SelectItem value="1_year">1 Year</SelectItem>
+                  <SelectItem value="more_than_1_year">More than 1 Year</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Submit Button */}

@@ -21,7 +21,7 @@ const ImageCarousel = () => {
   }, []);
 
   return (
-    <section className="pt-12 pb-4 bg-muted/30 overflow-hidden">
+    <section className="pt-20 pb-4 bg-muted/30 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="relative overflow-hidden rounded-2xl shadow-lg max-w-5xl mx-auto">
           <div
@@ -33,7 +33,7 @@ const ImageCarousel = () => {
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-auto object-contain max-h-[400px]"
+                  className="w-full h-auto object-contain max-h-[450px]"
                 />
               </div>
             ))}

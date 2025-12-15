@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ interface Booking {
   status: string;
 }
 const ReturnItems = () => {
+  const navigate = useNavigate();
   const {
     toast
   } = useToast();
@@ -194,13 +196,16 @@ const ReturnItems = () => {
           <p className="text-muted-foreground text-lg mb-10">Need your items back? Verify your email and select items for delivery. Items are typically delivered within 24 hours.</p>
 
           {!isVerified ? <div className="bg-card rounded-2xl p-8 shadow-soft border border-border">
-              <form onSubmit={isOtpSent ? handleVerifyOtp : handleSendOtp}>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                navigate("/return-thank-you");
+              }}>
                 <div className="space-y-4">
                   <div className="space-y-2 text-left">
                     <Label htmlFor="return-email">Email Address</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="return-email" type="email" placeholder="Enter your registered email" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} disabled={isOtpSent} required />
+                      <Input id="return-email" type="email" placeholder="Enter your registered email" className="pl-10" value={email} onChange={e => setEmail(e.target.value)} required />
                     </div>
                   </div>
 
@@ -208,32 +213,14 @@ const ReturnItems = () => {
                     <Label htmlFor="return-mobile">Mobile Number</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input id="return-mobile" type="tel" placeholder="Enter your mobile number" className="pl-10" value={mobileNumber} onChange={e => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))} disabled={isOtpSent} required />
+                      <Input id="return-mobile" type="tel" placeholder="Enter your mobile number" className="pl-10" value={mobileNumber} onChange={e => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10))} required />
                     </div>
                   </div>
 
-                  {!isOtpSent && email && mobileNumber.length === 10 && <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                      Send OTP
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>}
-
-                  {isOtpSent && <>
-                      <div className="space-y-2 text-left">
-                        <Label htmlFor="otp">Enter 6-digit OTP</Label>
-                        <Input id="otp" placeholder="000000" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} className="text-center text-2xl tracking-widest" required />
-                      </div>
-                      <Button type="submit" className="w-full" disabled={otp.length !== 6 || isLoading}>
-                        {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                        Verify & Continue
-                      </Button>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => {
-                  setIsOtpSent(false);
-                  setOtp("");
-                }}>
-                        Change email
-                      </Button>
-                    </>}
+                  <Button type="submit" className="w-full" disabled={!email || mobileNumber.length !== 10}>
+                    Submit
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
                 </div>
               </form>
             </div> : <div className="bg-card rounded-2xl p-8 shadow-soft border border-border text-left">

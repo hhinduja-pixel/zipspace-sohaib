@@ -45,7 +45,7 @@ const Pricing = () => {
   return (
     <section id="pricing" className="section-padding bg-muted/30">
       <div className="container-tight mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Storage Plans That Fit Your Needs
           </h2>

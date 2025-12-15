@@ -21,9 +21,9 @@ const ImageCarousel = () => {
   }, []);
 
   return (
-    <section className="py-8 bg-muted/30 overflow-hidden">
-      <div className="container-tight mx-auto px-4">
-        <div className="relative overflow-hidden rounded-2xl shadow-lg max-w-3xl mx-auto">
+    <section className="pt-12 pb-4 bg-muted/30 overflow-hidden">
+      <div className="container mx-auto px-4">
+        <div className="relative overflow-hidden rounded-2xl shadow-lg max-w-5xl mx-auto">
           <div
             className="flex transition-transform duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}

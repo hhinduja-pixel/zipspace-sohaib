@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Truck, Clock } from "lucide-react";
 const Hero = () => {
-  return <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden" style={{
+  return <section className="relative flex items-center justify-center py-12 md:py-16 overflow-hidden" style={{
     background: "var(--gradient-hero)"
   }}>
       {/* Background decorative elements */}

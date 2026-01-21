@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAIL = "admin@zipspace.in"; // Change this to your admin email
+const ADMIN_EMAILS = ["admin@zipspace.in", "hhinduja@gmail.com"];
 
 const storagePlanNames: Record<string, string> = {
   economy: "Economy (₹1,499/month)",
@@ -113,10 +113,10 @@ serve(async (req) => {
       `,
     });
 
-    // Send email to admin
+    // Send email to admin(s)
     await resend.emails.send({
       from: "ZipSpace <onboarding@resend.dev>",
-      to: [ADMIN_EMAIL],
+      to: ADMIN_EMAILS,
       subject: `New Booking - ${customerName}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

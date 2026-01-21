@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="ZipSpace Logo" className="h-12 md:h-14 w-auto" />
-            <span className="text-xl md:text-2xl font-bold text-secondary">Zip Space</span>
+            <span className="text-xl md:text-2xl font-bold text-secondary">ZipSpace</span>
           </Link>
 
           {/* Desktop Navigation */}

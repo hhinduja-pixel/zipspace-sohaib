@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/zipspace-logo.png";
+import logo from "@/assets/zipspace-icon.png";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navLinks = [{

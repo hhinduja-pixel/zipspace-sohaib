@@ -9,7 +9,7 @@ const storagePlans = [
     period: "/month",
     size: "Fits up to 10 medium boxes",
     description: "Ideal for students, seasonal items, and office documents",
-    features: ["Climate protection", "Photo inventory", "Free first pickup"],
+    features: ["Climate protection", "Photo inventory"],
   },
   {
     icon: Home,
@@ -18,7 +18,7 @@ const storagePlans = [
     period: "/month",
     size: "5 ft × 5 ft × 8.8 ft",
     description: "Stores items from a 1 BHK home",
-    features: ["Climate controlled", "Priority support", "Free first pickup"],
+    features: ["Climate controlled", "Priority support"],
     popular: true,
   },
   {

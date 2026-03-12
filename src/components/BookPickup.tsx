@@ -300,6 +300,24 @@ const BookPickup = () => {
 
       if (notificationError) throw notificationError;
 
+      // Send WhatsApp message
+      try {
+        // Only send if phone is valid
+        if (formData.phone && formData.phone.replace(/\D/g, "").length === 10) {
+          await fetch("/functions/v1/send-whatsapp-message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              phone: formData.phone.replace(/\D/g, ""),
+              message: "Thank you for choosing ZipSpace. One of representatives will connect with you shortly",
+            }),
+          });
+        }
+      } catch (waErr) {
+        // Optionally log or toast WhatsApp error, but do not block submission
+        console.error("WhatsApp message error", waErr);
+      }
+
       setIsSubmitted(true);
     } catch (error: any) {
       console.error("Submission error:", error);

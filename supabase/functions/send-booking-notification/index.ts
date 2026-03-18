@@ -103,12 +103,16 @@ serve(async (req) => {
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Service Plan:</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee;">${servicePlanNames[servicePlan] || servicePlan || "Basic"}</td>
         </tr>
-        ${storageDuration ? `
+        ${
+          storageDuration
+            ? `
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Storage Duration:</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee;">${storageDuration}</td>
         </tr>
-        ` : ""}
+        `
+            : ""
+        }
       </table>
     `;
 
@@ -159,15 +163,15 @@ serve(async (req) => {
 
     console.log("Booking notification emails sent successfully");
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error: any) {
     console.error("Error in send-booking-notification function:", error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

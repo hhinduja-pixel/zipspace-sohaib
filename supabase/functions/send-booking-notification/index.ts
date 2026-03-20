@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAILS = ["support@zipspace.in", "admin@zipspace.in", "hhinduja@gmail.com"];
+const ADMIN_EMAILS = ["support@zipspace.in", "admin@zipspace.in", "hhinduja@gmail.com", "apnaabill@gmail.com"];
 
 const storagePlanNames: Record<string, string> = {
   economy: "Economy (₹1,499/month)",
@@ -138,7 +138,7 @@ serve(async (req) => {
     if (email && email !== "not-provided@zipspace.in") {
       console.log("Sending confirmation email to customer:", email);
       const customerEmailResult = await resend.emails.send({
-        from: "ZipSpace <onboarding@resend.dev>",
+        from: "ZipSpace <support@mail.zipspace.in>",
         to: [email],
         subject: "Booking Request Received - ZipSpace Storage",
         html: `

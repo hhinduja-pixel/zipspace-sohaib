@@ -4,7 +4,7 @@ const stats = [
     label: "Items Securely Stored",
   },
   {
-    value: "10000+",
+    value: "11546+",
     label: "Monthly Subscriptions Sold",
   },
 //   {

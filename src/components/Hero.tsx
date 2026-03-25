@@ -15,13 +15,13 @@ const Hero = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-accent/50 border border-primary/20 rounded-full px-4 py-2 mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-secondary">15% off for first-time customers</span>
+            <span className="text-sm font-medium text-secondary">10% off for first-time customers</span>
           </div>
 
           {/* Main Heading */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-delay-1">
             More Space,{" "}
-            <span className="gradient-text">Less Stress.</span>
+            <span className="gradient-text">Zero Stress.</span>
           </h1>
 
           {/* Subheading */}

@@ -38,6 +38,7 @@ const BookPickup = () => {
     servicePlan: "basic",
     storageDuration: "",
     floorNumber: "",
+    insurance: "", // Yes or No
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -131,6 +132,9 @@ const BookPickup = () => {
       newErrors.storagePlan = "Please select a storage plan";
     }
 
+    if (!formData.insurance) {
+      newErrors.insurance = "Please select insurance option";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -277,6 +281,7 @@ const BookPickup = () => {
         pickup_time_slot: "To be scheduled",
         total_amount: 0, // Will be confirmed by team
         is_first_time: true,
+        insurance: formData.insurance, // Store insurance value
       });
 
       if (bookingError) throw bookingError;
@@ -295,6 +300,7 @@ const BookPickup = () => {
           servicePlan: formData.servicePlan,
           storageDuration: formData.storageDuration,
           floorNumber: formData.floorNumber,
+                  insurance: formData.insurance,
         },
       });
 
@@ -361,6 +367,7 @@ const BookPickup = () => {
                     servicePlan: "basic",
                     storageDuration: "",
                     floorNumber: "",
+                    insurance: "",
                   });
                 }}
               >
@@ -685,6 +692,43 @@ const BookPickup = () => {
                 </SelectContent>
               </Select>
             </div>
+
+              {/* Insurance Field */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  Insurance starting from ₹149 <span className="text-destructive">*</span>
+                </Label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="insurance"
+                      value="Yes"
+                      checked={formData.insurance === "Yes"}
+                      onChange={() => {
+                        setFormData({ ...formData, insurance: "Yes" });
+                        setErrors((prev) => ({ ...prev, insurance: "" }));
+                      }}
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="insurance"
+                      value="No"
+                      checked={formData.insurance === "No"}
+                      onChange={() => {
+                        setFormData({ ...formData, insurance: "No" });
+                        setErrors((prev) => ({ ...prev, insurance: "" }));
+                      }}
+                    />
+                    No
+                  </label>
+                </div>
+                {errors.insurance && <p className="text-sm text-destructive">{errors.insurance}</p>}
+              </div>
 
             {/* Submit Button */}
             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>

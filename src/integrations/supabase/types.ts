@@ -21,6 +21,7 @@ export type Database = {
           customer_name: string
           email: string
           id: string
+          insurance: string | null
           is_first_time: boolean | null
           payment_screenshot_url: string | null
           phone: string
@@ -38,6 +39,7 @@ export type Database = {
           customer_name: string
           email: string
           id?: string
+          insurance?: string | null
           is_first_time?: boolean | null
           payment_screenshot_url?: string | null
           phone: string
@@ -55,6 +57,7 @@ export type Database = {
           customer_name?: string
           email?: string
           id?: string
+          insurance?: string | null
           is_first_time?: boolean | null
           payment_screenshot_url?: string | null
           phone?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.bookings ADD COLUMN insurance text DEFAULT NULL;

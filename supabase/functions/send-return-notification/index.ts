@@ -8,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ADMIN_EMAILS = ["admin@zipspace.in", "hhinduja@gmail.com"];
+const ADMIN_EMAILS = ["support@zipspace.in", "admin@zipspace.in", "hhinduja@gmail.com", "apnaabill@gmail.com"];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

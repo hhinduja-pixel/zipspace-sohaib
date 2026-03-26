@@ -697,7 +697,7 @@ const BookPickup = () => {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-primary" />
-                  Insurance starting from ₹149 <span className="text-destructive">*</span>
+                  Insurance (starting from ₹149) <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">

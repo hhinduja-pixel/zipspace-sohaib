@@ -29,11 +29,11 @@ const ImageCarousel = () => {
             style={{ transform: `translateX(-${currentIndex * 100}%)` }}
           >
             {images.map((image, index) => (
-              <div key={index} className="flex-shrink-0 w-full">
+              <div key={index} className="flex-shrink-0 w-full aspect-[16/5]">
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="w-full h-auto object-cover max-h-[450px]"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             ))}
